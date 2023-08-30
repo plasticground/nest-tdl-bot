@@ -1,14 +1,24 @@
-import { ApiProperty } from '@nestjs/swagger';
-import {IsNotEmpty, IsNumber, IsOptional, IsPhoneNumber} from "class-validator";
+import {ApiProperty} from '@nestjs/swagger';
+import {IsNotEmpty, IsNumberString, IsOptional, IsPhoneNumber} from "class-validator";
+import {Transform, Type} from "class-transformer";
 
 export class LoginDto {
-    @ApiProperty()
-    @IsNotEmpty()
-    @IsPhoneNumber()
-    phone_number: string;
+  @ApiProperty({
+    type: String,
+    description: 'Your telegram phone number',
+    example: '+79998887766'
+  })
+  @IsNotEmpty()
+  @IsPhoneNumber()
+  phone_number: string;
 
-    @ApiProperty()
-    @IsNumber()
-    @IsOptional()
-    code: number;
+  @ApiProperty({
+    type: Number,
+    description: 'Telegram login code',
+    example: 12345
+  })
+  @Type(() => String)
+  @IsNumberString()
+  @IsOptional()
+  code: string;
 }

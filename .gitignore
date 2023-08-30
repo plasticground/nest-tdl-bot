@@ -51,3 +51,7 @@ tdjson_private.lib
 tdjson_static.lib
 tg_cli.exe
 zlib1.dll
+
+# Default telegram folders
+_td_database
+_td_files
