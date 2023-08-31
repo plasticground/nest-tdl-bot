@@ -1,5 +1,5 @@
-import {Injectable} from '@nestjs/common'
-import {ConfigService} from "@nestjs/config";
+import { Injectable } from '@nestjs/common'
+import { ConfigService } from "@nestjs/config";
 import * as tdl from 'tdl'
 import type {
   AuthorizationState,
@@ -49,23 +49,23 @@ export class ClientService {
 
     switch (this.authorizationState._) {
       case 'authorizationStateWaitPhoneNumber':
-        return await this.client.invoke({_: 'setAuthenticationPhoneNumber', phone_number: phone_number})
+        return await this.client.invoke({ _: 'setAuthenticationPhoneNumber', phone_number: phone_number })
       case 'authorizationStateWaitCode':
         if (code) {
-          return await this.client.invoke({_: 'checkAuthenticationCode', code: code})
+          return await this.client.invoke({ _: 'checkAuthenticationCode', code: code })
         } else {
           return null
         }
     }
 
-    return await this.client.invoke({_: 'getMe'})
+    return await this.client.invoke({ _: 'getMe' })
   }
 
   async getMe(): Promise<User> {
-    return await this.client.invoke({_: 'getMe'})
+    return await this.client.invoke({ _: 'getMe' })
   }
 
   async getAuthorizationState(): Promise<AuthorizationState> {
-    return await this.client.invoke({_: 'getAuthorizationState'})
+    return await this.client.invoke({ _: 'getAuthorizationState' })
   }
 }

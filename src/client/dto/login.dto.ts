@@ -1,6 +1,6 @@
-import {ApiProperty} from '@nestjs/swagger';
-import {IsNotEmpty, IsNumberString, IsOptional, IsPhoneNumber} from "class-validator";
-import {Transform, Type} from "class-transformer";
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsNumberString, IsOptional, IsPhoneNumber } from "class-validator";
+import { Type } from "class-transformer";
 
 export class LoginDto {
   @ApiProperty({
