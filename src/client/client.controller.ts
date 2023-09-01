@@ -1,8 +1,9 @@
 import { Body, Controller, Get, Post, UsePipes, ValidationPipe } from '@nestjs/common'
 import { ClientService } from './client.service'
 import { LoginDto } from "./dto/login.dto"
-import { ApiBody, ApiInternalServerErrorResponse, ApiOkResponse, ApiOperation } from "@nestjs/swagger";
+import { ApiBody, ApiInternalServerErrorResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 
+@ApiTags('Docs')
 @Controller()
 export class ClientController {
   constructor(private readonly service: ClientService) {
