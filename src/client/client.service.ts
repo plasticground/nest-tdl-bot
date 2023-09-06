@@ -8,7 +8,7 @@ import type {
   Message,
   sendMessage,
   formattedText$Input,
-  inputMessageText$Input
+  inputMessageText$Input, textParseModeMarkdown$Input, Ok
 } from "tdlib-types";
 
 
@@ -54,7 +54,7 @@ export class ClientService {
       })
 
     this.client.on('error', console.error)
-    this.client.on('update',(update) => {
+    this.client.on('update', (update) => {
       console.log(update)
 
       if (update._ === 'updateNewMessage') {
@@ -64,35 +64,47 @@ export class ClientService {
           update.message.chat_id,
           {
             content: content,
-            entities: content.text.entities,
-            entity_0: content.text.entities[0],
-            entity_1: content.text.entities[1],
+            entities: content.text.entities
           })
       }
     })
   }
 
   async getMe(): Promise<User> {
-    return await this.client.invoke({_: 'getMe'})
+    return await this.client.invoke({ _: 'getMe' })
   }
 
   async sendMessage(chat_id: number, text: string): Promise<Message> {
-    let message = <sendMessage>{
+    return await this.client.invoke(await this.prepareMessage(chat_id, text))
+  }
+
+  // async sendMessages(messages: sendMessage[]): Promise<Ok> {
+  //   //TODO
+  // }
+
+  async prepareMessage(chat_id: number, text: string): Promise<sendMessage> {
+    return {
       _: 'sendMessage',
       chat_id: chat_id,
       input_message_content: <inputMessageText$Input>{
         _: 'inputMessageText',
-        text: <formattedText$Input>{
-          _: 'formattedText',
-          text: text
-        }
+        text: await this.parseText(text)
       }
+    } as sendMessage
   }
 
-    return await this.client.invoke(message)
+  async parseText(text: string): Promise<formattedText$Input> {
+    return await this.client.invoke({
+      _: 'parseTextEntities',
+      text: text,
+      parse_mode: <textParseModeMarkdown$Input>{
+        _: 'textParseModeMarkdown',
+        version: 2 // https://core.telegram.org/bots/api#markdownv2-style
+      }
+    }) as formattedText$Input
   }
 
   async getAuthorizationState(): Promise<AuthorizationState> {
-    return await this.client.invoke({_: 'getAuthorizationState'})
+    return await this.client.invoke({ _: 'getAuthorizationState' })
   }
 }

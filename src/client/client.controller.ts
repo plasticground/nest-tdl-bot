@@ -1,6 +1,13 @@
 import { Body, Controller, Get, Post, UsePipes, ValidationPipe } from '@nestjs/common'
 import { ClientService } from './client.service'
-import { ApiBody, ApiInternalServerErrorResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
+import {
+  ApiBody,
+  ApiCreatedResponse,
+  ApiInternalServerErrorResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags
+} from "@nestjs/swagger";
 import { MessageDto } from "./dto/message.dto";
 
 @ApiTags('Docs')
@@ -18,7 +25,7 @@ export class ClientController {
   }
 
   @ApiOperation({ description: 'Send message' })
-  @ApiOkResponse({ description: 'Send text message to telegram chat' })
+  @ApiCreatedResponse({ description: 'Send text message to telegram chat' })
   @ApiInternalServerErrorResponse({ description: 'Telegram error.' })
   @ApiBody({
     description: 'Telegram chat ID and message text.',
