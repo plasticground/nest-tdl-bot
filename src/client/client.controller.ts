@@ -20,7 +20,7 @@ export class ClientController {
   @ApiOkResponse({ description: 'Returns the current user' })
   @ApiInternalServerErrorResponse({ description: 'Telegram error' })
   @Get('getMe')
-  getHello(): any {
+  getMe(): any {
     return this.service.getMe()
   }
 

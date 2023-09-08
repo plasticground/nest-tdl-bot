@@ -4,11 +4,14 @@ import * as tdl from 'tdl'
 import type {
   AuthorizationState,
   User,
-  messageText,
   Message,
   sendMessage,
   formattedText$Input,
-  inputMessageText$Input, textParseModeMarkdown$Input, Ok
+  inputMessageText$Input,
+  textParseModeMarkdown$Input,
+  Ok,
+  getMe,
+  ChatMember$Input
 } from "tdlib-types";
 import { MessageDto } from "./dto/message.dto";
 
@@ -56,24 +59,33 @@ export class ClientService {
 
     this.client.on('error', console.error)
     this.client.on('update', (update) => {
-      console.log(update)
+      // console.log(update)
 
-      if (update._ === 'updateNewMessage') {
-        let content = update.message.content as messageText
+      if (update._ === 'updateChatMember') {
+        let newChatMember = update.new_chat_member as ChatMember$Input
 
-        console.log(
-          update.message.chat_id,
-          {
-            content: content,
-            entities: content.text.entities
-          })
+        switch (newChatMember.status._) {
+          case "chatMemberStatusMember":
+            console.log(`Bot added to chat: ${update.chat_id}`) // TODO: save chat to DB
+            break
+          case "chatMemberStatusLeft":
+            console.log(`Bot left from chat: ${update.chat_id}`) // TODO: remove chat from DB
+            break
+          default:
+            break
+        }
       }
     })
   }
 
   async getMe(): Promise<User> {
-    return await this.client.invoke({ _: 'getMe' })
+    return await this.client.invoke(<getMe>{ _: 'getMe' })
   }
+
+  // TODO: load from DB
+  // async getChats(): Promise<Chats> {
+  //   return await this.client.invoke(<getChats>{ _: 'getChats' })
+  // }
 
   async sendMessage(message: MessageDto): Promise<Message> {
     return await this.client.invoke(await this.prepareMessage(message.chat_id, message.text))
@@ -84,7 +96,7 @@ export class ClientService {
       this.sendMessage(message).catch(console.error)
     })
 
-    return <Ok>{_: 'ok'}
+    return <Ok>{ _: 'ok' }
   }
 
   async prepareMessage(chat_id: number, text: string): Promise<sendMessage> {
