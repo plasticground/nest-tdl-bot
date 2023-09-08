@@ -10,6 +10,7 @@ import type {
   formattedText$Input,
   inputMessageText$Input, textParseModeMarkdown$Input, Ok
 } from "tdlib-types";
+import { MessageDto } from "./dto/message.dto";
 
 
 @Injectable()
@@ -74,13 +75,17 @@ export class ClientService {
     return await this.client.invoke({ _: 'getMe' })
   }
 
-  async sendMessage(chat_id: number, text: string): Promise<Message> {
-    return await this.client.invoke(await this.prepareMessage(chat_id, text))
+  async sendMessage(message: MessageDto): Promise<Message> {
+    return await this.client.invoke(await this.prepareMessage(message.chat_id, message.text))
   }
 
-  // async sendMessages(messages: sendMessage[]): Promise<Ok> {
-  //   //TODO
-  // }
+  async sendMessages(messages: MessageDto[]): Promise<Ok> {
+    messages.forEach((message: MessageDto) => {
+      this.sendMessage(message).catch(console.error)
+    })
+
+    return <Ok>{_: 'ok'}
+  }
 
   async prepareMessage(chat_id: number, text: string): Promise<sendMessage> {
     return {
