@@ -11,7 +11,9 @@ import type {
   textParseModeMarkdown$Input,
   Ok,
   getMe,
-  ChatMember$Input
+  ChatMember$Input,
+  getChat,
+  Chat
 } from "tdlib-types";
 import { MessageDto } from "./dto/message.dto";
 
@@ -80,6 +82,10 @@ export class ClientService {
 
   async getMe(): Promise<User> {
     return await this.client.invoke(<getMe>{ _: 'getMe' })
+  }
+
+  async getChat(chat_id: number): Promise<Chat> {
+    return await this.client.invoke(<getChat>{ _: 'getChat', chat_id: chat_id })
   }
 
   // TODO: load from DB

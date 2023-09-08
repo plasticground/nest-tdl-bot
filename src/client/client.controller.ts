@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UsePipes, ValidationPipe } from '@nestjs/common'
+import { Body, Controller, Get, Param, Post, UsePipes, ValidationPipe } from '@nestjs/common'
 import { ClientService } from './client.service'
 import {
   ApiBody,
@@ -6,9 +6,11 @@ import {
   ApiInternalServerErrorResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiParam,
   ApiTags
 } from "@nestjs/swagger";
 import { MessageDto } from "./dto/message.dto";
+import type { Chat, User, Message, Ok } from "tdlib-types";
 
 @ApiTags('Docs')
 @Controller()
@@ -20,8 +22,22 @@ export class ClientController {
   @ApiOkResponse({ description: 'Returns the current user' })
   @ApiInternalServerErrorResponse({ description: 'Telegram error' })
   @Get('getMe')
-  getMe(): any {
+  getMe(): Promise<User> {
     return this.service.getMe()
+  }
+
+  @ApiOperation({ description: 'Get the chat info by ID' })
+  @ApiOkResponse({ description: 'Returns the chat info by ID' })
+  @ApiInternalServerErrorResponse({ description: 'Telegram error' })
+  @ApiParam({
+    name: 'chat_id',
+    description: 'Telegram chat ID',
+    type: Number,
+    example: -1001987654321
+  })
+  @Get('getChat/:chat_id')
+  getChat(@Param('chat_id') chat_id: number): Promise<Chat> {
+    return this.service.getChat(chat_id)
   }
 
   @ApiOperation({ description: 'Send message' })
@@ -33,7 +49,7 @@ export class ClientController {
   })
   @Post('sendMessage')
   @UsePipes(new ValidationPipe({ transform: true }))
-  sendMessage(@Body() messageDto: MessageDto): any {
+  sendMessage(@Body() messageDto: MessageDto): Promise<Message> {
     return this.service.sendMessage(messageDto)
   }
 
@@ -46,7 +62,7 @@ export class ClientController {
   })
   @Post('sendMessages')
   @UsePipes(new ValidationPipe({ transform: true }))
-  sendMessages(@Body() messagesDto: MessageDto[]): any {
+  sendMessages(@Body() messagesDto: MessageDto[]): Promise<Ok> {
     return this.service.sendMessages(messagesDto)
   }
 }
