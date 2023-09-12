@@ -5,6 +5,8 @@ import telegram from "./config/telegram";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { ClientController } from "./client/client.controller";
 import { ClientService } from "./client/client.service";
+import { Chat } from "./client/entities/chat.entity";
+import { ClientModule } from "./client/client.module";
 
 @Module({
   imports: [
@@ -12,7 +14,7 @@ import { ClientService } from "./client/client.service";
       load: [database, telegram]
     }),
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
+      imports: [ConfigModule, ClientModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
@@ -21,13 +23,11 @@ import { ClientService } from "./client/client.service";
         username: configService.get<string>('database.username'),
         password: configService.get<string>('database.password'),
         database: configService.get<string>('database.database'),
-        entities: [],
+        entities: [Chat],
         synchronize: true,
       }),
     })
-  ],
-  controllers: [ClientController],
-  providers: [ClientService],
+  ]
 })
 export class AppModule {
 }

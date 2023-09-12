@@ -13,17 +13,23 @@ import type {
   getMe,
   ChatMember$Input,
   getChat,
-  Chat
+  Chat, Update
 } from "tdlib-types";
 import { MessageDto } from "./dto/message.dto";
-
+import { InjectRepository } from "@nestjs/typeorm";
+import { Chat as ChatEntity } from "./entities/chat.entity";
+import { Repository } from "typeorm";
 
 @Injectable()
 export class ClientService {
   private client: tdl.Client;
   private authorizationState: AuthorizationState;
 
-  constructor(private configService: ConfigService) {
+  constructor(
+    private configService: ConfigService,
+    @InjectRepository(ChatEntity)
+    private chatsRepository: Repository<ChatEntity>
+  ) {
     tdl.configure({
       // Path to the library. By default, it is 'tdjson.dll' on Windows,
       // 'libtdjson.dylib' on macOS, or 'libtdjson.so' otherwise.
@@ -60,23 +66,10 @@ export class ClientService {
       })
 
     this.client.on('error', console.error)
-    this.client.on('update', (update) => {
+    this.client.on('update', (update: Update) => {
       // console.log(update)
 
-      if (update._ === 'updateChatMember') {
-        let newChatMember = update.new_chat_member as ChatMember$Input
-
-        switch (newChatMember.status._) {
-          case "chatMemberStatusMember":
-            console.log(`Bot added to chat: ${update.chat_id}`) // TODO: save chat to DB
-            break
-          case "chatMemberStatusLeft":
-            console.log(`Bot left from chat: ${update.chat_id}`) // TODO: remove chat from DB
-            break
-          default:
-            break
-        }
-      }
+      this.manageBotChat(update).catch(console.error)
     })
   }
 
@@ -88,10 +81,47 @@ export class ClientService {
     return await this.client.invoke(<getChat>{ _: 'getChat', chat_id: chat_id })
   }
 
-  // TODO: load from DB
-  // async getChats(): Promise<Chats> {
-  //   return await this.client.invoke(<getChats>{ _: 'getChats' })
-  // }
+  async manageBotChat(update: Update) {
+    if (update._ === 'updateChatMember') {
+      let newChatMember = update.new_chat_member as ChatMember$Input
+      let chat = await this.getChat(update.chat_id)
+
+      if (chat) {
+        let storedChat = await this.chatsRepository.findOneBy({ chat_id: update.chat_id })
+
+        switch (newChatMember.status._) {
+          case "chatMemberStatusMember":
+            this.chatsRepository.save({
+              id: storedChat?.id,
+              chat_id: chat.id,
+              title: chat.title,
+              isActive: true,
+              added_at: update.date
+            })
+              .then(() => console.log(`Bot added to chat: ${update.chat_id}`))
+              .catch(console.error)
+            break
+          case "chatMemberStatusLeft":
+            this.chatsRepository.save({
+              id: storedChat?.id,
+              chat_id: chat.id,
+              title: chat.title,
+              isActive: false,
+              left_at: update.date
+            })
+              .then(() => console.log(`Bot left from chat: ${update.chat_id}`))
+              .catch(console.error)
+            break
+          default:
+            break
+        }
+      }
+    }
+  }
+
+  async getChats(): Promise<ChatEntity[]> {
+    return await this.chatsRepository.find()
+  }
 
   async sendMessage(message: MessageDto): Promise<Message> {
     return await this.client.invoke(await this.prepareMessage(message.chat_id, message.text))

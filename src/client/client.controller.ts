@@ -11,6 +11,7 @@ import {
 } from "@nestjs/swagger";
 import { MessageDto } from "./dto/message.dto";
 import type { Chat, User, Message, Ok } from "tdlib-types";
+import { Chat as ChatEntity } from "./entities/chat.entity";
 
 @ApiTags('Docs')
 @Controller()
@@ -38,6 +39,14 @@ export class ClientController {
   @Get('getChat/:chat_id')
   getChat(@Param('chat_id') chat_id: number): Promise<Chat> {
     return this.service.getChat(chat_id)
+  }
+
+  @ApiOperation({ description: 'Get all bot\'s chats' })
+  @ApiOkResponse({ description: 'Returns all chats to which the bot was added' })
+  @ApiInternalServerErrorResponse({ description: 'Telegram error' })
+  @Get('getChats')
+  getChats(): Promise<ChatEntity[]> {
+    return this.service.getChats()
   }
 
   @ApiOperation({ description: 'Send message' })
