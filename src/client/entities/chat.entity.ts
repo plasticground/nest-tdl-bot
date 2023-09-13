@@ -17,6 +17,12 @@ export class Chat {
   @Column()
   isActive: boolean
 
+  @Column({ nullable: true, unique: true, type: "numeric" })
+  photo_id: number
+
+  @Column({ nullable: true, unique: true })
+  photo_path: string
+
   @Column({ nullable: true, default: null, type: "bigint" })
   added_at: number
 

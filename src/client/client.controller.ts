@@ -10,7 +10,7 @@ import {
   ApiTags
 } from "@nestjs/swagger";
 import { MessageDto } from "./dto/message.dto";
-import type { Chat, User, Message, Ok } from "tdlib-types";
+import type { Chat, User, Message, Ok, File } from "tdlib-types";
 import { Chat as ChatEntity } from "./entities/chat.entity";
 
 @ApiTags('Docs')
@@ -18,7 +18,7 @@ import { Chat as ChatEntity } from "./entities/chat.entity";
 export class ClientController {
   constructor(private readonly service: ClientService) {
   }
-
+//TODO: for all endpoints add response examples
   @ApiOperation({ description: 'Get the current user' })
   @ApiOkResponse({ description: 'Returns the current user' })
   @ApiInternalServerErrorResponse({ description: 'Telegram error' })
